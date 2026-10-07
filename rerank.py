@@ -23,10 +23,12 @@ from rank_bm25 import BM25Okapi
 from brave_client import BraveClient
 
 TOKEN = re.compile(r"[a-z0-9_]+")
+MARKDOWN_ESCAPE = re.compile(r"\\([\\`*_{}\[\]()#+\-.!|])")
 
 
 def tokenize(text: str) -> list[str]:
-    return TOKEN.findall(text.lower())
+    # LLM Context snippets are Markdown, so ERR_SSL_PROTOCOL_ERROR often arrives as ERR\_SSL\_PROTOCOL\_ERROR.
+    return TOKEN.findall(MARKDOWN_ESCAPE.sub(r"\1", text).lower())
 
 
 def bm25_rank(query: str, chunks: list[str]) -> list[int]:
